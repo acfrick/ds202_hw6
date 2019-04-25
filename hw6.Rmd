@@ -1,0 +1,90 @@
+---
+title: "hw6"
+author: "Allegra Frickel"
+date: "4/22/2019"
+output: html_document
+---
+
+```{r}
+best <- readxl::read_xlsx('KIB - Best in Show (public).xlsx', sheet='Best in show')
+
+full <- readxl::read_xlsx('KIB - Best in Show (public).xlsx', sheet='Best in show full sheet')
+```
+
+```{r}
+library(dplyr)
+full <- full %>% select('Best in show?', 'largest value', '..5', '160', '87', '80', '..12', '..32')
+full <- full[-c(1:3),]
+```
+
+```{r}
+names(full)[1] <- 'breed'
+names(full)[2] <- 'category'
+names(full)[3] <- 'score'
+names(full)[4] <- 'pop1'
+names(full)[5] <- 'popularity'
+names(full)[6] <- 'intel1'
+names(full)[7] <- 'intel2'
+names(full)[8] <- 'size'
+```
+
+```{r}
+full$breed <- as.factor(full$breed)
+full$category <- as.factor(full$category)
+full$score <- as.numeric(full$score)
+full$popularity <- as.numeric(full$popularity)
+full$intel1 <- as.numeric(full$intel1)
+full$intel2 <- as.numeric(full$intel2)
+full$size <- as.factor(full$size)
+```
+
+```{r}
+full$size <- factor(full$size, levels = c("small", "medium", "large"))
+```
+
+```{r}
+#cols <- c(`herding` = 'orange', `hound` = 'purple', `non-sporting` = 'green', `sporting` = 'red', `terrier` = 'yellow', `toy` = 'maroon', `working` = 'darkgreen')
+```
+
+```{r}
+knitr::opts_chunk$set(fig.width = 15, fig.height=10)
+```
+
+Need to add labels to the quadrants, add shape to represent intelligence, fix overlapping
+
+```{r}
+dumb <- filter(full, intel2 < 0.5)
+clever <- filter(full, intel2 >= 0.5)
+#create intelligence column with dumbs and clevers, then assign shape to intelligence
+```
+
+```{r}
+library(ggplot2)
+library(plotly)
+library(ggrepel)
+plt <- ggplot(full, aes(x=score, y=-popularity, color=category, size=size, label=breed)) + 
+  geom_point() + 
+  geom_text(data=full, aes(x=score, y=-popularity, label=breed), size=2) + 
+  geom_vline(xintercept = 2.315) + geom_hline(yintercept = -59.5) + 
+  theme(legend.position="right") + 
+  xlab('our data score') + ggtitle('Best in Show: The Ultimate Data Dog')
+ggplotly(plt)
+```
+
+```{r}
+annotations <- data.frame(
+  xpos = c(-Inf,-Inf,Inf,Inf),
+  ypos =  c(-Inf, Inf,-Inf,Inf),
+  annotateText = c("The Rightly Ignored","Inexplicably Overrated","Overlooked Treasures","Hot Dogs!"),
+  hjustvar = c(0,0,1,1),
+  vjustvar = c(0,1,0,1))
+
+#plt + geom_text(data=annotations, aes(x=xpos,y=ypos,hjust=hjustvar,vjust=vjustvar,label=annotateText))
+```
+
+
+
+
+
+
+
